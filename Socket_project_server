@@ -1,0 +1,31 @@
+import  socket
+from datetime import  datetime
+
+
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # Create a TCP socket (IPv4, stream-based)
+
+host = socket.gethostname() # Get the hostname of the local machine
+port  = 2376                # Port number to listen on
+server.bind((host , port))  # Bind the server to the host and port
+server.listen(5)            # Start listening for incoming connections (up to 5 queued)
+
+print("Server Started")
+
+while True:                                # Infinite loop — the server runs continuously
+    try:
+        con, ip = server.accept()          # Accept a new client connection
+        message = con.recv(1024).decode()  # Receive a message from the client (up to 1024 bytes)
+        if not message:      # If the client sent nothing — close connection and continue
+            con.close()
+            continue
+        time = datetime.now().strftime("%H:%M:%S")     # Get the current time
+        print(f"Client ip is {ip} and send message at {time} and message is {message}  ")   # Print information to the server console
+        con.send(f'Client your message is {message}, and send message at {time}'.encode())  # Send a response back to the client
+        con.close()        # Close the connection with the client
+    except Exception as e:
+        con.send(f'Error maybe you did not write anything.{e}'.encode())  # If an error occurs — try sending an error message to the client
+    finally:
+        con.close() # Close the connection with the client
+        print("server end")
+
+server.close() # Close the server socket
